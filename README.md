@@ -1,13 +1,5 @@
-# Sample Hardhat Project
+# Web3bridge Test I
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+**Contract Address for Token1:** 0xC908DfA6551e76641Fda4e82DeCF49751e7c7540
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+**Contract Address for Token2:** 0x162Fa35064E961B608009EF636202979FD74415D
