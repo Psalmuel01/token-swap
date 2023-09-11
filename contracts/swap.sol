@@ -11,8 +11,6 @@ contract TokenSwap is Ownable {
     uint public reserveA;
     uint public reserveB;
 
-    uint public constant k = 2e6;
-
     struct LiquidityProvider {
         uint amountA;
         uint amountB;
@@ -27,14 +25,14 @@ contract TokenSwap is Ownable {
 
     function getAmountOut(uint _amountA) public view returns (uint) {
         // b = B - (k / (A + a))
-        LiquidityProvider storage provider = liquidityProviders[msg.sender];
-        return (provider.amountB - (k / (provider.amountA + _amountA)));
+        uint k = reserveA * reserveB;
+        return (reserveB - (k / (reserveA + _amountA)));
     }
 
     function getAmountIn(uint _amountB) public view returns (uint) {
         // a = A - (k / (B + b))
-        LiquidityProvider storage provider = liquidityProviders[msg.sender];
-        return (provider.amountA - (k / (provider.amountB + _amountB)));
+        uint k = reserveA * reserveB;
+        return (reserveA - (k / (reserveB + _amountB)));
     }
 
     function swapAToB(uint amountA) external {
@@ -44,6 +42,8 @@ contract TokenSwap is Ownable {
             tokenA.transferFrom(msg.sender, address(this), amountA),
             "Transfer of tokenA failed"
         );
+        reserveA += amountA;
+        reserveB -= amountB;
         LiquidityProvider storage provider = liquidityProviders[msg.sender];
         provider.amountA += amountA;
         provider.amountB -= amountB;
@@ -56,6 +56,8 @@ contract TokenSwap is Ownable {
             tokenB.transferFrom(msg.sender, address(this), amountB),
             "Transfer of tokenB failed"
         );
+        reserveA -= amountA;
+        reserveB += amountB;
         LiquidityProvider storage provider = liquidityProviders[msg.sender];
         provider.amountA -= amountA;
         provider.amountB += amountB;
@@ -92,7 +94,13 @@ contract TokenSwap is Ownable {
         provider.amountA -= _amountA;
         provider.amountB -= _amountB;
 
-        require(tokenA.transfer(msg.sender, _amountA), "Withdrawal of tokenA failed");
-        require(tokenB.transfer(msg.sender, _amountB), "Withdrawal of tokenB failed");
+        require(
+            tokenA.transfer(msg.sender, _amountA),
+            "Withdrawal of tokenA failed"
+        );
+        require(
+            tokenB.transfer(msg.sender, _amountB),
+            "Withdrawal of tokenB failed"
+        );
     }
 }

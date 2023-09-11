@@ -1,14 +1,8 @@
-# Web3bridge Test I
-
-**Contract Address for Token1:** 0xC908DfA6551e76641Fda4e82DeCF49751e7c7540
-
-**Contract Address for Token2:** 0x162Fa35064E961B608009EF636202979FD74415D
-
 # TokenSwap Smart Contract
 
 ## Table of Contents
 
-- [Overview](#contract-overview)
+- [Overview](#overview)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Contract Functions](#contract-functions)
@@ -82,6 +76,6 @@ To get started with TokenSwap, follow these steps:
 
 ## Verified Contracts
 
-- [Swap contract address](https://sepolia.etherscan.io/address/0x7cBc92c9eB3848AD97ae8357D6A95DB0fc89925A#code)
+- [Swap contract address](https://sepolia.etherscan.io/address/0xBBE383b1316f1aA99647F4eAffad92f0A9C64dAF#code)
 - [Token1 contract address](https://sepolia.etherscan.io/address/0xC908DfA6551e76641Fda4e82DeCF49751e7c7540#code)
 - [Token2 contract address](https://sepolia.etherscan.io/address/0x162Fa35064E961B608009EF636202979FD74415D#code)

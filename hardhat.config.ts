@@ -14,7 +14,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         // @ts-ignore
-        url: process.env.URL,
+        url: process.env.BASERPC,
       },
     },
   },
