@@ -18,7 +18,7 @@ contract TokenSwap is Ownable {
         uint amountB;
     }
 
-    mapping(address => LiquidityProvider) liquidityProvider;
+    mapping(address => LiquidityProvider) liquidityProviders;
 
     constructor(address _tokenA, address _tokenB) {
         tokenA = IERC20(_tokenA);
@@ -27,21 +27,24 @@ contract TokenSwap is Ownable {
 
     function getAmountOut(uint _amountA) public view returns (uint) {
         // b = B - (k / (A + a))
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
         return (provider.amountB - (k / (provider.amountA + _amountA)));
     }
 
     function getAmountIn(uint _amountB) public view returns (uint) {
         // a = A - (k / (B + b))
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
         return (provider.amountA - (k / (provider.amountB + _amountB)));
     }
 
     function swapAToB(uint amountA) external {
         uint amountB = getAmountOut(amountA);
         require(amountB > 0, "Insufficient output amount");
-        tokenA.transferFrom(msg.sender, address(this), amountA);
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
+        require(
+            tokenA.transferFrom(msg.sender, address(this), amountA),
+            "Transfer of tokenA failed"
+        );
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
         provider.amountA += amountA;
         provider.amountB -= amountB;
     }
@@ -49,29 +52,47 @@ contract TokenSwap is Ownable {
     function swapBToA(uint amountB) external {
         uint amountA = getAmountIn(amountB);
         require(amountA > 0, "Insufficient input amount");
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
+        require(
+            tokenB.transferFrom(msg.sender, address(this), amountB),
+            "Transfer of tokenB failed"
+        );
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
         provider.amountA -= amountA;
         provider.amountB += amountB;
     }
 
     function addLiquidity(uint _amountA, uint _amountB) external {
-        tokenA.transferFrom(msg.sender, address(this), amountA);
-        tokenB.transferFrom(msg.sender, address(this), amountB);
+        require(_amountA > 0, "Invalid amountA");
+        require(_amountB > 0, "Invalid amountB");
+        require(
+            tokenA.transferFrom(msg.sender, address(this), _amountA),
+            "Transfer of tokenA failed"
+        );
+        require(
+            tokenB.transferFrom(msg.sender, address(this), _amountB),
+            "Transfer of tokenB failed"
+        );
         reserveA += _amountA;
         reserveB += _amountB;
 
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
         provider.amountA += _amountA;
         provider.amountB += _amountB;
     }
 
-    function withdrawLiquidity(uint _amountA, uint _amountB) {
-        LiquidityProvider storage provider = liquidityProvider[msg.sender];
-        uint balA = provider.amountA;
-        uint balB = provider.amountB;
-        require(balA > _amountA, "Insufficient balance of tokenA");
-        require(balB > _amountB, "Insufficient balance of tokenA");
+    // if add, t b u;
+    // if withdraw, u b t;
+    function withdrawLiquidity(uint _amountA, uint _amountB) external {
+        LiquidityProvider storage provider = liquidityProviders[msg.sender];
+        require(provider.amountA > _amountA, "Insufficient balance of tokenA");
+        require(provider.amountB > _amountB, "Insufficient balance of tokenB");
+
+        reserveA -= _amountA;
+        reserveB -= _amountB;
         provider.amountA -= _amountA;
         provider.amountB -= _amountB;
+
+        require(tokenA.transfer(msg.sender, _amountA), "Withdrawal of tokenA failed");
+        require(tokenB.transfer(msg.sender, _amountB), "Withdrawal of tokenB failed");
     }
 }
