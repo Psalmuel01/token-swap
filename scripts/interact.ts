@@ -20,22 +20,39 @@ async function main() {
 
   const [owner] = await ethers.getSigners();
   const allowance = ethers.parseEther("50000000000");
-  const addTokenA = ethers.parseEther("200");
-  const addTokenB = ethers.parseEther("500");
+  const addTokenA = ethers.parseEther("20");
+  const addTokenB = ethers.parseEther("50");
 
   contractA.connect(owner).approve(swap, allowance);
   contractB.connect(owner).approve(swap, allowance);
 
   const allowA = await contractA.allowance(owner, swap);
   const allowB = await contractB.allowance(owner, swap);
-  console.log(allowA, allowB);
+  // console.log(allowA, allowB);
 
   const liquidity = await swapContract
     .connect(owner)
     .addLiquidity(addTokenA, addTokenB);
+  // console.log(await liquidity.wait());
 
-  await liquidity.wait();
+  const withdraw = await swapContract
+    .connect(owner)
+    .withdrawLiquidity(addTokenA, addTokenB);
+  // console.log(withdraw);
 
+  const swapAtoB = await swapContract.swapAToB(ethers.parseEther("2"));
+  const swapBtoA = await swapContract.swapBToA(ethers.parseEther("5"));
+  // console.log(swapAtoB);
+  // console.log(swapBtoA);
+
+  //trying to get balance after swap
+  console.log({
+    balanceA2: ethers.formatEther(await contractA.balanceOf(ownerAddr)),
+    balanceB2: ethers.formatEther(await contractB.balanceOf(ownerAddr)),
+  });
+
+  console.log(ethers.formatEther(await swapContract.getAmountOut(ethers.parseEther("1"))));
+  console.log(ethers.formatEther(await swapContract.getAmountIn(ethers.parseEther("2"))));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -44,3 +61,4 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
