@@ -7,19 +7,19 @@ const config: HardhatUserConfig = {
   solidity: "0.8.19",
   networks: {
     sepolia: {
-      url: process.env.BASERPC,
+      url: process.env.SEPOLIARPC,
       // @ts-ignore
       accounts: [process.env.PRIVATEKEY],
     },
     hardhat: {
       forking: {
         // @ts-ignore
-        url: process.env.BASERPC,
+        url: process.env.SEPOLIARPC,
       },
     },
   },
   etherscan: {
-    apiKey: process.env.BASE_API_KEY,
+    apiKey: process.env.API_KEY,
   },
 };
 

@@ -18,6 +18,9 @@ contract TokenSwap is Ownable {
 
     mapping(address => LiquidityProvider) liquidityProviders;
 
+    event SwappedAToB(address indexed sender, uint amountA, uint amountB);
+    event SwappedBToA(address indexed sender, uint amountB, uint amountA);
+
     constructor(address _tokenA, address _tokenB) {
         tokenA = IERC20(_tokenA);
         tokenB = IERC20(_tokenB);
@@ -38,29 +41,41 @@ contract TokenSwap is Ownable {
     function swapAToB(uint amountA) external {
         uint amountB = getAmountOut(amountA);
         require(amountB > 0, "Insufficient output amount");
-        require(
-            tokenA.transferFrom(msg.sender, address(this), amountA),
-            "Transfer of tokenA failed"
-        );
+
+        //Transfer amountA from the sender to this contract
+        bool aSuc = tokenA.transferFrom(msg.sender, address(this), amountA);
+        require(aSuc, "Transfer of tokenA failed");
+
+        //Update reserves
         reserveA += amountA;
         reserveB -= amountB;
-        LiquidityProvider storage provider = liquidityProviders[msg.sender];
-        provider.amountA += amountA;
-        provider.amountB -= amountB;
+
+        //Transfer amountB from this contract to the sender
+        bool bSuc = tokenB.transfer(msg.sender, amountB);
+        require(bSuc, "Transfer of tokenB failed");
+
+        //Emit an event for the swap
+        emit SwappedAToB(msg.sender, amountA, amountB);
     }
 
     function swapBToA(uint amountB) external {
         uint amountA = getAmountIn(amountB);
         require(amountA > 0, "Insufficient input amount");
-        require(
-            tokenB.transferFrom(msg.sender, address(this), amountB),
-            "Transfer of tokenB failed"
-        );
-        reserveA -= amountA;
+
+        //Transfer amountB from the sender to this contract
+        bool bSuc = tokenB.transferFrom(msg.sender, address(this), amountB);
+        require(bSuc, "Transfer of tokenB failed");
+
+        //Update reserves
         reserveB += amountB;
-        LiquidityProvider storage provider = liquidityProviders[msg.sender];
-        provider.amountA -= amountA;
-        provider.amountB += amountB;
+        reserveA -= amountA;
+
+        //Transfer amountA from this contract to the sender
+        bool aSuc = tokenA.transfer(msg.sender, amountA);
+        require(aSuc, "Transfer of tokenA failed");
+
+        //Emit an event for the swap
+        emit SwappedBToA(msg.sender, amountB, amountA);
     }
 
     function addLiquidity(uint _amountA, uint _amountB) external {
