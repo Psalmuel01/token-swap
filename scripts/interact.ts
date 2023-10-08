@@ -15,7 +15,7 @@ async function main() {
   // ])
 
   // contract addresses
-  
+
   const tokenA = "0xC908DfA6551e76641Fda4e82DeCF49751e7c7540";
   const tokenB = "0x162Fa35064E961B608009EF636202979FD74415D";
   const swap = "0x5620Ecce0fA7eBc7a70Fa421cE8d5A851130F075";
@@ -70,9 +70,10 @@ async function main() {
 
   // swapping A to B and checking amount of B out
 
-  const amountA = ethers.parseEther("10");
+  const amountA = ethers.parseEther("200");
 
   console.log({
+    amountAIn: ethers.formatEther(amountA),
     amountBOut: ethers.formatEther(
       await swapContract.connect(owner).getAmountOut(amountA)
     ),
@@ -83,9 +84,10 @@ async function main() {
 
   // swapping B to A and checking amount of A in
 
-  const amountB = ethers.parseEther("20");
+  const amountB = ethers.parseEther("350");
 
   console.log({
+    amountBOut: ethers.formatEther(amountB),
     amountAIn: ethers.formatEther(
       await swapContract.connect(owner).getAmountIn(amountB)
     ),
